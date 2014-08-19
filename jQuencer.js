@@ -112,14 +112,13 @@ var jQuencer={
         timerCount:0,
 		playAllSteps: function () {
 			if (this.steps.length == 0) { return; }
-			$("body").trigger(jQuencer.sequencer.stepStarted);
 			this.currentIndex=0;
 			for (var i = 0; i < this.steps.length; i++) {
 			    var n = jQuencer.ctx.currentTime;
 			    this.timerCount++;
-			    this.currentIndex++;
-				var stepCurr = n+(this.timerCount*jQuencer.tempoCalculator.defaultTempo);
+				var stepCurr = n+(this.timerCount*(jQuencer.tempoCalculator.defaultTempo/1000));
 				var oList = this.steps[i].oscillators;
+				var oCount=0;
 				oList.forEach(function (osc) {
 
 					jQuencer.vca.gain.cancelScheduledValues(stepCurr);
@@ -139,15 +138,33 @@ var jQuencer={
 					o.connect(jQuencer.vca);
 					o.start(stepCurr);
 					o.stop(stepCurr + (decay + 0.2));
+					if(oCount==0){
+						o.onended = function () {
+						o.disconnect();
+						$("body").trigger(jQuencer.sequencer.stepStarted);
+						 jQuencer.sequencer.currentIndex++;
+						 if (jQuencer.sequencer.currentIndex > jQuencer.sequencer.steps.length - 1) {
+			                  jQuencer.sequencer.currentIndex = 0;
+			             }
+
+
+
+			             };
+					}
+					else{
 					o.onended = function () {
 						o.disconnect();
 						$("body").trigger(jQuencer.sequencer.stepStopped);
 
 					};
+						
+					}
 					osc.oscillator = o;
+					oCount++;
 
 				});
 			}
+
 				if (this.timerCount < 100) { //dont batch forever
 					//start over if no stop action is taken
 					//if (!this.stop) {
