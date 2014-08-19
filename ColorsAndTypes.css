@@ -1,0 +1,170 @@
+﻿body  {
+    font-family: Arial;
+    color: #444;
+    font-size: 100%;
+    background-color: #84bf53;
+    margin:0;
+    padding:0;
+}
+
+h3, .h3 {
+    font-family: Arial, Segoe UI;font-style: normal;font-weight: normal;font-size: 1.0em;color:white
+}
+h1{ font-family: Arial, Segoe UI;font-style: normal;font-weight: normal;font-size: 2.4em;color:white}
+h2, .h2{ font-family: Arial, Segoe UI;font-style: normal;font-weight: normal;font-size: 2.0em;color:white}
+button {
+    padding: 5px;
+    font-size: 2em;
+    background-color:transparent;
+    color:#fff;
+
+    font-weight:normal;
+    border-width:0px;
+
+}
+.dabomb{
+    font-size:420%;
+}
+.weakText{
+    color:rgba(255,255,255,0.5)
+}
+
+.logo{
+    background-image:url('sprite.png');
+    background-position:-99px -145px;
+    height:200px;
+
+}
+#stopPauseToggle {
+    background-image:url('sprite.png');
+    background-position:-16px -430px;
+    width:40px;
+    height:40px;
+}
+
+.triangle{
+    background-image:url('sprite.png');
+    background-position:5px -298px;
+    width:30px;
+    height:30px;
+}
+.sine{
+    background-image:url('sprite.png');
+    background-position:5px -332px;
+    width:30px;
+    height:20px;
+
+}
+.saw{
+    background-image:url('sprite.png');
+    background-position:5px -359px;
+    width:30px;
+    height:30px;
+
+}
+
+
+#stopPauseToggle.pause {
+    background-image:url('sprite.png');
+    background-position:-16px -472px;
+    width:40px;
+    height:40px;
+}
+
+ul.menu li:hover {
+    background-color: #eee;
+}
+
+ul.menu li:hover a {
+    color: #279c3d;
+}
+
+ul.menu a {
+    font-family: "Open Sans", sans-serif;
+    text-decoration: none;
+    cursor: default;
+    color: #279c3d;
+    font-size: 16px;
+    font-weight: 600;
+}
+#footer {
+    position: absolute;
+    padding: 20px;
+    height: 150px;
+    bottom: 0;
+    width: 100%;
+    background: #666;
+    color:#ccc
+}
+div.sliderBgLeft{
+        background-image:url('sprite.png');
+    background-position:-64px -479px;
+    width:49px;
+    height:40px;
+    margin:4px 0px 0px 10px;
+
+
+}
+div.sliderBgRight{
+        background-image:url('sprite.png');
+    background-position:-296px -472px;
+    width:49px;
+    height:40px;
+    margin-left:4px
+
+}
+input[type='range'] {
+        -webkit-appearance: none;
+        border-radius: 4px;
+        box-shadow: none 0 0 5px #333;
+        background-color: rgba(255,255,255,0.4);
+        height: 6px;
+        vertical-align: middle;
+    }
+
+    input[type='range']::-moz-range-track {
+        -moz-appearance: none;
+        border-radius: 5px;
+        box-shadow: none 0 0 5px #888;
+        background-color: #eee;
+        height: 10px;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none !important;
+        border-radius: 20px;
+        background-color: #FFF;
+        box-shadow: inset 0 0 10px rgba(000,000,000,0.0);
+        border: 1px solid #fff;
+        height: 30px;
+        width: 30px;
+    }
+
+    input[type='range']::-moz-range-thumb {
+        -moz-appearance: none;
+        border-radius: 20px;
+        background-color: #FFF;
+        box-shadow: inset 0 0 10px rgba(000,000,000,0.0);
+        border: 1px solid #999;
+        height: 30px;
+        width: 30px;
+    }
+    #sliderContainer{
+        width:80%;
+    }
+
+    @media (max-width: 980px) {
+    #sliderContainer{
+        width:75%;
+    }
+
+}
+@media (max-width: 767px) {
+h1{font-size:2em}
+h2{font-size:1.6em}
+    #sliderContainer{
+        width:52%;
+    }
+
+}
+

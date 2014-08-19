@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="http://ajax.aspnetcdn.com/ajax/modernizr/modernizr-2.6.2.js"></script>
+    <script src="jquery-2.1.1.min.js"></script>
+    
+    <script>
+        $("document").ready(function ($) {
+            $(".language>.choose").bind("click", function () {
+                alert("desk");
+                if (Modernizr.touch) {
+                    $(this).find(".flags").toggle();
+                    //alert("h");
+                    //if ((this).find(".flags").css("display") == "none") {
+                    //    $(this).find(".flags").show();
+                    //}
+                    //else {
+                    //    $(this).find(".flags").hide();
+                    //}
+                }
+
+                //On Hover - Works on ios
+                //$("p").hide();
+                //$(this).find(".flags").show();
+            }
+            );
+        });
+
+
+    </script>
+    <style>
+        div.flags {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="language">
+        sdfsdfsdfsdfsdfsdf
+        <div class="choose">
+        HOOOVRA
+                <div class="flags">FLAGGOR</div>
+        </div>
+    </div>
+</body>
+</html>

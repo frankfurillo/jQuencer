@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport"
+          content="width=device-width,
+  minimum-scale=1.0, maximum-scale=1.0,minimal-ui" />
+    <title>ZZQ</title>
+    <script src="jquery-2.1.1.min.js"></script>
+    <script src="jQuencer.js"></script>
+    <script src="trapatap.js"></script>
+    <link href="strapless.css" rel="stylesheet" />
+    <link href="ColorsAndTypes.css" rel="stylesheet" />
+    <script>
+        function isMobile() {
+            return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|android|ipad|playbook|silk/i.test(navigator.userAgent || navigator.vendor || window.opera) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test((navigator.userAgent || navigator.vendor || window.opera).substr(0, 4)))
+        }
+
+		$.fn.extend({ 
+				disableSelection : function() { 
+						this.each(function() { 
+								this.onselectstart = function() { return false; }; 
+								this.unselectable = "on"; 
+								$(this).css('-moz-user-select', 'none'); 
+								$(this).css('-webkit-user-select', 'none'); 
+						}); 
+				} 
+		});
+      
+        $("document").ready(function () {
+		$("body").disableSelection();
+            jQuencerUI = {
+                oscWidth:24,
+                defaultNoOfOScillators:8,
+                isMouseDown: false,
+                mouseStartX: 0,
+                mouseStartY: 0,
+                mouseCurrX: 0,
+                mouseCurrY: 0,
+                offsetY: $(".oscGridInner").offset().top,
+                offsetX: $(".oscGridInner").offset().left,
+                height :$(".oscGridInner").height()-20,
+                editingIndex: 0,
+                oscMouseDown: null,
+				holdTimer:0,
+                oscs: [],
+                
+                getFrequencyFromClick:function(){
+                    var negativeTop = this.height - (this.mouseCurrY - this.offsetY);
+                    var percentOfHeight = negativeTop / this.height;
+                    return jQuencer.defaults.maxFrequency * percentOfHeight;
+                },
+                getYposFromFrequency:function(freq){
+                    return (jQuencer.defaults.maxFrequency-freq) / jQuencer.defaults.maxFrequency * (this.height-20);
+                },
+                back:function(){
+                    this.editingIndex--;
+                    this.refreshViews();
+                },
+                forward:function(){
+                    this.editingIndex++;
+                    this.refreshViews();
+                },
+                updateIndexView:function(ind){
+                    $(".indexSpan").text(ind);
+                },
+                refreshViews:function(){
+                    $(".indexSpan").text(this.editingIndex + 1);
+                    $(".oscBorder:not([data-index=" + this.editingIndex + "])").addClass("disabledOsc");
+                    $(".oscBorder[data-index=" + this.editingIndex + "]").removeClass("disabledOsc");
+                },
+                changeType: function (o) {
+                    var ind = o.attr("data-index");
+                    
+                    var getType = this.getOscillator(o).type;
+                    var setType = "";
+                    o.removeClass("saw sine triangle");
+                    if (getType == "sine") {
+                        setType = "sawtooth";
+                        o.addClass("saw");
+                    }
+                    else if (getType == "sawtooth") {
+                        setType = "triangle";
+                        o.addClass("triangle");
+                    }
+                    else {
+                        setType = "sine";
+                        o.addClass("sine");
+                    }
+                    this.getOscillator(o).type=setType;
+
+                },
+                getOscillator:function(uiOsc){
+                    return jQuencer.sequencer.getOscillator(uiOsc.attr('data-index'),uiOsc.attr('data-oscIndex'));
+
+                },
+                
+                oscMouseMoveAction:function(event){
+	                var o=this.oscMouseDown; 	
+					if (o!=null) {
+						//alert(targetPositionOffset)
+	                    var yPos = this.mouseCurrY - this.offsetY - this.oscStartOffsetY;
+						var xPos = this.mouseCurrX - this.offsetX - this.oscStartOffsetX;
+						
+	                    if (yPos < 10 || yPos > this.getYposFromFrequency(40)) {
+	                        return;
+	                    }
+	                    var deltaX = this.mouseStartX - this.mouseCurrX
+	                    if (deltaX > 45 || deltaX < -45) { //Remove oscillator if swipe to left or right
+	                        jQuencer.sequencer.removeFromStep(o.attr('data-index'), o.attr('data-oscIndex'))
+	                        o.remove();
+	                        return;
+	                    }
+
+	                	//alert(this.oscMouseDown.offset().top)
+		               o.css('top',yPos);
+		               this.getOscillator(o).freq=this.getFrequencyFromClick();
+	                  //  var freq = jQuencerUI.getFrequencyFromClick();
+	                  //  
+	
+	                }
+                },
+                setMousePositionStart:function(x,y){
+	                this.mouseStartX = this.mouseCurrX = x;
+	                this.mouseStartY = this.mouseCurrY = y;
+                },
+                setMousePosition:function(x,y){
+	                this.mouseCurrX = x;
+	                this.mouseCurrY = y;
+                },
+                isClick:function(){
+	                return (jQuencerUI.mouseStartX - jQuencerUI.mouseCurrX == 0) && (jQuencerUI.mouseStartY - jQuencerUI.mouseCurrY == 0);
+                },
+                addOsc: function (yPos,oscIndex) {
+                    var o = $(document.createElement("div"));
+                    o.addClass("oscBorder sine");
+                    var ind = this.editingIndex
+                    var ref = this;
+					if(!isMobile()){
+						o.bind("mousedown", function (event) {
+							
+							jQuencerUI.oscMouseDown=o;
+							jQuencerUI.setMousePositionStart(event.pageX,event.pageY);
+							jQuencerUI.oscStartOffsetY=jQuencerUI.mouseStartY - jQuencerUI.offsetY - o.offset().top;
+							jQuencerUI.oscStartOffsetX=jQuencerUI.mouseStartX - jQuencerUI.offsetX - o.offset().left;
+							
+							
+							
+							//CHange type on mouseclick on an existing blob
+						});
+					}
+					else{
+						trapatap.trapStart(o,function(){
+							jQuencerUI.oscMouseDown=o;
+							jQuencerUI.setMousePositionStart(trapatap.touchStartX,trapatap.touchStartY);
+							jQuencerUI.oscStartOffsetY=jQuencerUI.mouseStartY - jQuencerUI.offsetY - o.offset().top;
+							jQuencerUI.oscStartOffsetX=jQuencerUI.mouseStartX - jQuencerUI.offsetX - o.offset().left;
+
+							jQuencerUI.holdTimer = setTimeout(function(){
+								if(jQuencerUI.oscMouseDown==o && jQuencerUI.isClick()){
+									alert("pop props win, not implemented");
+								}
+							},2000);
+						})
+					}
+                    o.bind("mouseup", function (event) {
+                        if(jQuencerUI.holdTimer !=0){
+							clearTimeout(jQuencerUI.holdTimer);
+                        }
+
+
+						//CHange type on mouseclick on an existing blob
+						if(jQuencerUI.oscMouseDown==o && jQuencerUI.isClick()){
+	                        jQuencerUI.changeType(o);
+	                        event.stopPropagation();
+                        }
+                        jQuencerUI.oscMouseDown=null;
+                    });
+
+                    if (typeof (yPos) == "undefined") {
+                        yPos = this.mouseCurrY - this.offsetY;
+                    }
+                    //var setX = this.mouseCurrX - this.offsetX;
+
+                    o.css("top", yPos);
+                    o.css("left", this.getOscLeft(this.editingIndex));
+                    o.attr("data-index", ind);
+                    o.attr("data-oscIndex",oscIndex);
+                    $(".oscGrid").append(o);
+                    this.oscs.push(o);
+                },
+                getOscLeft: function(oscIndex){
+                    var width = $(".oscGridInner").width() - 10;
+                    var colWidth = width / this.defaultNoOfOScillators;
+                    return (colWidth * oscIndex) + ((colWidth / 2) - (this.oscWidth/2)); //10 is oscBorderWidth / 10 ish
+
+                },
+                addOscBG: function (oscIndex) {
+                    var o = $(document.createElement("div"));
+                    o.addClass("oscBg");
+                    o.css("left", (this.getOscLeft(oscIndex) + (this.oscWidth/2) + 6));
+                    o.css("height", this.height);
+                    $(".oscGrid").append(o);
+                }
+
+            }
+
+            bindEventsToGrid(0);
+
+        });
+
+        function go() {
+            uiSteps();
+
+            jQuencer.init(function (ctx) {
+                $("#tempoSlider").val(60000/jQuencer.tempoCalculator.defaultTempo);
+               // $("#tempoSliderValue").text($("#tempoSlider").val());
+                //jQuencerUI.updateIndexView(jQuencer.sequencer.currentIndex);
+            });
+
+        }
+        var lastLit = "";
+        function bindEventsToGrid(stepIndex) {
+            $("body").on("StepStarted", function (e) {
+                if (lastLit != "") {
+                    lastLit.forEach(function(os){
+                        os.removeClass("red");
+                    }
+                )
+                };
+
+                //var s = stepIndex;
+                lastLit = [];
+                jQuencerUI.oscs.forEach(function (os) {
+                    if (os.attr("data-index") == jQuencer.sequencer.currentIndex) {
+                        os.addClass("red");
+                        lastLit.push(os);
+                    }
+                })
+            });
+            $("body").on("StepStopped", function (e) {
+                //should be here
+                //if (jQuencer.sequencer.currentIndex > 0) {
+                //    jQuencerUI.oscs[jQuencer.sequencer.currentIndex - 1 //should have PreviousIndex on sequencer instead, this is wrong].removeClass("red");
+                //}
+                //  $(".oscBorder[data-index=]")
+            });
+          //  trapatap.trapStart($(".oscGrid"), function () {
+            //    jQuencerUI.isMouseDown = true;
+              //  jQuencerUI.setMousePositionStart(trapatap.touchStartX, trapatap.touchStartY);
+           // });
+
+            $(".oscGrid").bind('mousedown', function (event) {
+                jQuencerUI.isMouseDown = true;
+                jQuencerUI.setMousePositionStart(event.pageX, event.pageY);
+            });
+         
+            $("#stopPauseToggle").click(function (s) {
+                if ($(this).hasClass("pause")) {
+                    jQuencer.stop();
+                    $(this).removeClass("pause");
+                }
+                else {
+                    jQuencer.start();
+                    $(this).addClass("pause");
+                }
+            })
+
+            trapatap.trapMove($(".oscGrid"), function () {
+                if (jQuencerUI.isMouseDown || jQuencerUI.oscMouseDown != null) {
+                    event.preventDefault();	//CANCELS the TEMPOSLIDER. NOTE FIX
+                    
+                    //alert(trapatap.touchEndX);
+					jQuencerUI.setMousePosition(trapatap.touchEndX, trapatap.touchEndY);
+                    jQuencerUI.oscMouseMoveAction();
+                }
+            });
+
+            $("body").bind('mousemove', function (event) {
+                //event.stopPropagation();
+               // event.preventDefault();
+			  
+                if(jQuencerUI.isMouseDown || jQuencerUI.oscMouseDown !=null){
+					 event.preventDefault();	//CANCELS the TEMPOSLIDER. NOTE FIX
+	               	 jQuencerUI.setMousePosition(event.pageX,event.pageY);
+	               	 jQuencerUI.oscMouseMoveAction();
+	            }
+
+            });
+
+            $("body").bind('mouseup', function (event) {
+            	jQuencerUI.oscMouseDown=null;
+
+                if (jQuencerUI.isMouseDown) {
+                	 jQuencerUI.isMouseDown =false;
+
+                    if (jQuencerUI.isClick()) {
+                        //click
+                        //add
+                       var freq = jQuencerUI.getFrequencyFromClick();
+                        if (!gone) {
+                            go(); //init
+
+                            gone = true;
+                            return;
+                        }
+                        $(".splashOscGrid").hide();
+                        var offsetX = $(".oscGridInner").offset().left;
+                        jQuencerUI.editingIndex = Math.floor(((jQuencerUI.mouseCurrX - offsetX) / $(".oscGridInner").width()) * jQuencerUI.defaultNoOfOScillators);
+                        var oscIndex= jQuencer.sequencer.addToStep(jQuencerUI.editingIndex, "sine", freq);
+                        //var index= jQuencer.sequencer.addStep([{ type: 'sine', freq: freq}])
+                        jQuencerUI.addOsc(jQuencerUI.getYposFromFrequency(freq),oscIndex);
+                    }
+                }
+
+            });
+
+        }
+        var gone = false;
+        function uiSteps() {
+            $(".splashOscGrid").hide();
+
+            for (var i = 0; i < jQuencerUI.defaultNoOfOScillators; i++) {
+                jQuencerUI.editingIndex = i;
+                var oscIndex= jQuencer.sequencer.addToStep(i, "sine", 440);
+                jQuencerUI.addOscBG(i);
+                jQuencerUI.addOsc(jQuencerUI.getYposFromFrequency(440), oscIndex);
+
+
+            }
+            
+        }
+
+    </script>
+    <style>
+
+
+      div.stepContainer{
+          padding:20px;
+          background-color:#eee;
+          margin:2px;
+          
+      }
+      div.oscContainer{
+          border:1px solid #ddd;
+          border-radius:5px;
+          padding:5px;
+          margin-top:10px;
+      }
+      div.oscBorder {
+          width:36px;height:36px;
+          border-radius:50%;
+          background-color:rgba(255,255,255,0.6);
+          color:#555;
+          padding:9px 0px 0px 8px;
+          font-size:12px;
+          position:absolute;
+          top:0px;left:0px;
+      }
+        div.oscBg {
+            width: 3px;
+            height: 240px;
+            background-color: rgba(0,0,0,0.04);
+            border-width:0px;
+            color: #555;
+            padding: 0px;
+            font-size: 1px;
+            position: absolute;
+            top: 10px;
+        }
+      
+
+      .red{
+          background-color:white!important;
+      }
+        .disabledOsc{
+            opacity:0.4;
+        }
+        
+        
+         div.splashOscGrid {
+            left: 50%;
+            margin-left:-110px;
+            top: 19%;
+            font-size: 30px;
+            display: block;
+            color: white;
+            font-family: arial;
+            position: absolute;
+        }
+
+
+        .oscGrid {
+            width: 100%;
+            height: 100%;
+            background-color: #90d359;
+        }
+        Div.oscGridInner {
+            height: 85%;
+            background-color: #90d359;
+        }
+         DIV.footer{
+             color:black;
+             height:60px;
+             padding:10px 0px 10px 10px;
+             margin-top:-60px;
+         }
+         .header{position:absolute;top:0px;height:30px;padding:10px}
+         div.indexSpan {font-weight:bold;margin:0px 10px 0px 10px}
+    
+
+
+
+    </style>
+</head>
+<body>
+
+    <div class="mainContainer" style="height:100%;">
+        <div class="header container">
+        </div>
+        <div class="oscGrid" style="margin-top:0px">
+            <div class="oscGridInner">
+
+                <div class="splashOscGrid">
+                    <div class="dabomb weakText">ezQ</div>
+                    <div class="weakText" style="font-size:91%;margin-left:8px">n-step sequencer</div>
+                    <div style="margin-top:20px;margin-left:auto;margin-right:auto;width:40px">
+                        <i class="icon-large icon-chevron-right"></i>
+                    </div>
+                    
+                </div>
+            </div>
+        
+        </div>
+        
+        <div class="footer" style="margin-left:auto;width:100%;margin-right:auto;">
+            <button class="stacked" id="stopPauseToggle" style="width:37px"  class="pause"></button>
+                <!--<button onclick="go()" class="play">&#160;</button>-->
+                <div class="sliderBgLeft stacked" >&#160;</div>
+                <div class="stacked container" id="sliderContainer" style="margin-top:7px;margin:10px 0px 10px 0px">
+                    
+                    <input  type="range" id="tempoSlider" style="width:100%" oninput="jQuencer.tempoCalculator.changeTempo(this.value)" min="10" max="2000" step="4" />
+                    <!--<div class="stacked" id="tempoSliderValue"></div>-->
+
+                </div>
+                <div class="sliderBgRight stacked">&#160;</div>
+        </div>
+    </div>
+
+</body>
+</html>
