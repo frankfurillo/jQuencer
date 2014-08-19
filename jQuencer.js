@@ -109,6 +109,53 @@ var jQuencer={
         removeFromStep:function(stepIndex,oscillatorIndex){
 	      this.steps[stepIndex].oscillators.splice(oscillatorIndex,1);  
         },
+        timerCount:0,
+		playAllSteps: function () {
+			if (this.steps.length == 0) { return; }
+			$("body").trigger(jQuencer.sequencer.stepStarted);
+			this.currentIndex=0;
+			for (var i = 0; i < this.steps.length; i++) {
+			    var n = jQuencer.ctx.currentTime;
+			    this.timerCount++;
+			    this.currentIndex++;
+				var stepCurr = n+(this.timerCount*jQuencer.tempoCalculator.defaultTempo);
+				var oList = this.steps[i].oscillators;
+				oList.forEach(function (osc) {
+
+					jQuencer.vca.gain.cancelScheduledValues(stepCurr);
+					jQuencer.vca.gain.setValueAtTime(0, stepCurr);
+					var topVol = 0.9 / oList.length; //
+					if (jQuencer.pause) {
+						topVol = 0;
+					}
+					jQuencer.vca.gain.linearRampToValueAtTime(topVol, stepCurr + 0.1);
+					var decay = 0.3;
+					jQuencer.vca.gain.linearRampToValueAtTime(0.0, stepCurr + decay);
+					// jQuencer.vca.connect(jQuencer.ctx.destination);
+
+					var o = jQuencer.ctx.createOscillator();
+					o.type = osc.type;
+					o.frequency.value = osc.freq;
+					o.connect(jQuencer.vca);
+					o.start(stepCurr);
+					o.stop(stepCurr + (decay + 0.2));
+					o.onended = function () {
+						o.disconnect();
+						$("body").trigger(jQuencer.sequencer.stepStopped);
+
+					};
+					osc.oscillator = o;
+
+				});
+			}
+				if (this.timerCount < 100) { //dont batch forever
+					//start over if no stop action is taken
+					//if (!this.stop) {
+						this.playAllSteps();
+					//}
+				}
+
+		},
         playStep: function () {
             if (this.steps.length == 0) { return;}
             var oList = this.steps[this.currentIndex].oscillators;
@@ -147,9 +194,10 @@ var jQuencer={
         ,
         
         run: function () {
- 
             //this.stopPreviousStep();
-            this.playStep();
+            //this.playAllSteps(); //UNDER CONSTRUCTION
+			//return;
+			this.playStep();
             this.currentIndex++;
 
 
