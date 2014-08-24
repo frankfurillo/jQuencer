@@ -11,7 +11,7 @@ var jQuencer={
         
     
     defaults : {
-        maxFrequency: 4000
+        maxFrequency: 2000
     },
 
     //EXE http://localhost/AngularSpa3/jQuencer/index.html?{%22command%22:%22sequence%22,%22notes%22:[12,24]}
@@ -58,9 +58,9 @@ var jQuencer={
             return 60000 / bpm;
         }
         ,
-        defaultTempo: 500,
+        defaultTempo: 120.0,
         changeTempo: function (bpm) {
-            this.defaultTempo = this.msFromBpm(bpm);
+            jQuencer.sequencer.tempo= bpm;
         }
     }
     ,
@@ -145,10 +145,10 @@ var jQuencer={
 		    // Advance current note and time by a 16th note...
 		    var secondsPerBeat = 60.0 / this.tempo;    // Notice this picks up the CURRENT 
 		                                          // tempo value to calculate beat length.
-		    this.nextNoteTime += 0.25 * secondsPerBeat;    // Add beat length to last beat time
+		    this.nextNoteTime += 0.75 * secondsPerBeat;    // Add beat length to last beat time
 		
 		    this.currentIndex++;    // Advance the beat number, wrap to zero
-		    if (this.currentIndex== this.steps.length - 1) {
+		    if (this.currentIndex== this.steps.length ) {
 		        this.currentIndex = 0;
 		    }
 		},
@@ -157,12 +157,46 @@ var jQuencer={
 		    this.notesInQueue.push( { note: beatNumber, time: time } );
 		
 		    // create an oscillator
-		    var osc = jQuencer.ctx.createOscillator();
-		    osc.connect( jQuencer.ctx.destination );
-		    osc.frequency.value = 220.0;
+		    //var osc = jQuencer.ctx.createOscillator();
+		    //osc.connect( jQuencer.ctx.destination );
+		    //osc.frequency.value = 220.0;
 		
-		    osc.start( time );
-		    osc.stop( time + 0.2 );
+		    //osc.start( time );
+		    //osc.stop(time + 0.2);
+
+		    var oList = this.steps[this.currentIndex].oscillators;
+		    oList.forEach(function (osc) {
+
+		        var n = time;
+		        jQuencer.vca.gain.cancelScheduledValues(n);
+		        jQuencer.vca.gain.setValueAtTime(0, n);
+		        var topVol = 0.3 / oList.length; //
+		        if (jQuencer.pause) {
+		            topVol = 0;
+		        }
+		        jQuencer.vca.gain.linearRampToValueAtTime(topVol, n + 0.01);
+		        var decay = 0.3;
+		        jQuencer.vca.gain.linearRampToValueAtTime(0.0, n + decay);
+		        //jQuencer.vca.connect(jQuencer.ctx.destination);
+
+		        var o = jQuencer.ctx.createOscillator();
+		        o.type = osc.type;
+		        o.frequency.value = osc.freq;
+		        o.connect(jQuencer.vca);
+		        o.start(0);
+		        o.stop(n + (decay + 0.01));
+		        o.onended = function () {
+		           o.disconnect();
+		           // $("body").trigger(jQuencer.sequencer.stepStopped);
+
+		        };
+		        osc.oscillator = o;
+
+		    });
+		    $("body").trigger(jQuencer.sequencer.stepStarted);
+
+
+
 		},
 
         timerCount:0,

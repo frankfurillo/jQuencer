@@ -213,7 +213,7 @@
             uiSteps();
 
             jQuencer.init(function (ctx) {
-                $("#tempoSlider").val(60000/jQuencer.tempoCalculator.defaultTempo);
+                $("#tempoSlider").val(jQuencer.tempoCalculator.defaultTempo);
                // $("#tempoSliderValue").text($("#tempoSlider").val());
                 //jQuencerUI.updateIndexView(jQuencer.sequencer.currentIndex);
             });
@@ -439,7 +439,7 @@
                 <div class="sliderBgLeft stacked" >&#160;</div>
                 <div class="stacked container" id="sliderContainer" style="margin-top:7px;margin:10px 0px 10px 0px">
                     
-                    <input  type="range" id="tempoSlider" style="width:100%" oninput="jQuencer.tempoCalculator.changeTempo(this.value)" min="10" max="2000" step="4" />
+                    <input  type="range" id="tempoSlider" style="width:100%" oninput="jQuencer.tempoCalculator.changeTempo(this.value)" min="10" max="1000" step="4" />
                     <!--<div class="stacked" id="tempoSliderValue"></div>-->
 
                 </div>
