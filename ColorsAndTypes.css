@@ -25,6 +25,9 @@ button {
 .dabomb{
     font-size:420%;
 }
+dabombSub{
+    font-size:91%;
+}
 .weakText{
     color:rgba(255,255,255,0.5)
 }
@@ -159,7 +162,34 @@ input[type='range'] {
     }
 
 }
+
+             div.splashOscGrid {
+            left: 50%;
+            margin-left:-110px;
+            top: 19%;
+            font-size: 30px;
+            display: block;
+            color: white;
+            font-family: arial;
+            position: absolute;
+        }
+
 @media (max-width: 767px) {
+    .dabomb{
+    font-size:350%;
+}
+
+    .dabombSub{
+    font-size:75%;
+}
+        div.splashOscGrid {
+    margin-left:-95px;
+    top: 12%;
+
+}
+
+
+
 h1{font-size:2em}
 h2{font-size:1.6em}
     #sliderContainer{

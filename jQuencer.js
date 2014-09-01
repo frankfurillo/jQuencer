@@ -25,8 +25,21 @@ var jQuencer={
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
         this.vca = this.ctx.createGain();
-        this.vca.connect(this.ctx.destination);
-        try{
+
+        this.compressor = this.ctx.createDynamicsCompressor();
+        this.vca.connect(this.compressor);
+
+        this.delay = this.ctx.createDelay();
+        this.delay.delayTime.value = 0.25;
+        this.delayFeedback= this.ctx.createGain();
+        this.delayFeedback.connect(this.delay);
+        this.delayFeedback.gain.value = 0.3;
+        this.delay.connect(this.delayFeedback);
+
+        this.delay.connect(this.compressor)
+        this.compressor.connect(this.ctx.destination);
+
+        try {
             this.query = JSON.parse(unescape(window.location.search.substring(1)))
             if (this.query.command == "sequence") {
                 if (typeof (query.tempo) != "undefined") {
@@ -175,7 +188,7 @@ var jQuencer={
 		            topVol = 0;
 		        }
 		        jQuencer.vca.gain.linearRampToValueAtTime(topVol, n + 0.01);
-		        var decay = 0.3;
+		        var decay = 0.2;
 		        jQuencer.vca.gain.linearRampToValueAtTime(0.0, n + decay);
 		        //jQuencer.vca.connect(jQuencer.ctx.destination);
 
