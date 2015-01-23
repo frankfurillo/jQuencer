@@ -1,0 +1,30 @@
+{
+  "name": "jQuencer",
+  "version": "1.0.0",
+  "description": "sequencer",
+  "main": "jQuencer.js",
+  "scripts": {
+    "test": "echo \"hej\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frankfurillo/jQuencer.git"
+  },
+  "keywords": [
+    "js",
+    "web",
+    "audio",
+    "api"
+  ],
+  "author": "Gunnar Franklin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/frankfurillo/jQuencer/issues"
+  },
+  "homepage": "https://github.com/frankfurillo/jQuencer",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-uglify": "^0.7.0"
+  }
+}
