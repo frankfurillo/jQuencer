@@ -35,12 +35,20 @@
             });
 
         },
+        trapTilt:function (callback){
+            var gCrap = setInterval(function () {
+                callback(); //completely pointless?
+                return trapatap;
+            }, 50);
+        },
         trapEnd: function (jQueryObj, callback) {
         jQueryObj.bind('touchend', function (event) {
             trapatap.isTouching = false;
             callback();
             return trapatap;
         });
+        
+
 
         }
         ,

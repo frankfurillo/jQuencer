@@ -8,7 +8,7 @@
     <title>ZZQ</title>
     <script src="jquery-2.1.1.min.js"></script>
     <script src="src/jQuencer.js"></script>
-    <script src="css/trapatap.js"></script>
+    <script src="src/trapatap.js"></script>
     <link href="css/strapless.css" rel="stylesheet" />
     <link href="css/ColorsAndTypes.css" rel="stylesheet" />
     <script>
@@ -268,6 +268,10 @@
                     $(this).addClass("pause");
                 }
             })
+            trapatap.trapTilt(function () {
+                //connect filter to acceleromter y
+                jQuencer.biquadFilter.frequency.value = 2000 + (trapatap.accelerometer[1] * 100);
+            })
 
             trapatap.trapMove($(".oscGrid"), function () {
                 if (jQuencerUI.isMouseDown || jQuencerUI.oscMouseDown != null) {
@@ -409,7 +413,7 @@
 <body>
 
     <div class="mainContainer" style="height:100%;">
-        <div class="header container">
+        <div class="header container"><input id="accmeter" style="display:none" value="0"/>
         </div>
         <div class="oscGrid" style="margin-top:0px">
             <div class="oscGridInner">
@@ -427,15 +431,11 @@
         </div>
         
         <div class="footer" style="margin-left:auto;width:100%;margin-right:auto;">
-            <button class="stacked" id="stopPauseToggle" style="width:37px"  class="pause"></button>
+            <button class="stacked pause" id="stopPauseToggle" style="width:37px"></button>
                 <!--<button onclick="go()" class="play">&#160;</button>-->
                 <div class="sliderBgLeft stacked" >&#160;</div>
                 <div class="stacked container" id="sliderContainer" style="margin-top:7px;margin:10px 0px 10px 0px">
-
-                    <input type="range" id="fxSlider" style="width:100%" oninput="jQuencer.biquadFilter.frequency.value=this.value" min="0" max="3000" step="40" />
-                    
                     <input  type="range" id="tempoSlider" style="width:100%" oninput="jQuencer.tempoCalculator.changeTempo(this.value)" min="10" max="1000" step="4" />
-                    <!--<div class="stacked" id="tempoSliderValue"></div>-->
 
                 </div>
                 <div class="sliderBgRight stacked">&#160;</div>

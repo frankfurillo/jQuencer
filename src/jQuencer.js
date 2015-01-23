@@ -1,25 +1,34 @@
 ﻿(function(window, $) {
 	       	"use strict"
-var jQuencer={
-	ctx:null,
+
+	       	var jQuencer = {
+	       	    ctx: null,
+                irHallBuffer:null,
 	query:null,
-	pause:true,
+	pause: true,
     commands: ["sequence", "single"],
     vca:null,
     st: "",
     fxKnobValue:0.94,
     bufferSize: 2048,
+    loadSounds: function(){
+        var irHallRequest = new XMLHttpRequest();
+        irHallRequest.open("GET", "audio/spring.wav", true);
+        irHallRequest.responseType = "arraybuffer";
+        irHallRequest.onload = function () {
+            
+            jQuencer.ctx.decodeAudioData(irHallRequest.response, function (buffer) {
+                
+                jQuencer.irHallBuffer = buffer;
+                jQuencer.convolver.buffer = buffer;
+            });
+        }
+        irHallRequest.send();
+    },
     convolverEffect: function () {
         //TODO Add reverg .ogg file, and replace this noise crap.
-        var convolver = this.ctx.createConvolver(),
-            noiseBuffer = this.ctx.createBuffer(2, jQuencer.fxKnobValue * this.ctx.sampleRate, this.ctx.sampleRate),
-            left = noiseBuffer.getChannelData(0),
-            right = noiseBuffer.getChannelData(1);
-        for (var i = 0; i < noiseBuffer.length; i++) {
-            left[i] = Math.random() * 2 - 1;
-            right[i] = Math.random() * 2 - 1;
-        }
-        convolver.buffer = noiseBuffer;
+        var convolver = this.ctx.createConvolver();
+        convolver.buffer = this.irHallBuffer;
         return convolver;
     },
     
@@ -29,7 +38,7 @@ var jQuencer={
 
     //EXE http://localhost/AngularSpa3/jQuencer/index.html?{%22command%22:%22sequence%22,%22notes%22:[12,24]}
     init:function(loadedFunction) {
-        if (this.ctx!=null) {
+        if (this.ctx != null) {
             //already initialized
             this.start();
             return;
@@ -37,42 +46,33 @@ var jQuencer={
         this.pause=false;
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
+        this.loadSounds();
+
         //this.tmpBuffer = this.moogeffect();
-        this.tmpBuffer = this.convolverEffect();
+        this.startBuffer = this.ctx.createGain();
+
+        this.convolver = this.convolverEffect();
         this.vca = this.ctx.createGain();
 
         this.compressor = this.ctx.createDynamicsCompressor();
       
-        //this.rev = this.ctx.createConvolver();
-        //this.revGain = this.ctx.createGain();
-        //this.revGain.value = 7.5;
-        //this.revGain.connect(this.rev);
+        this.startBuffer.connect(this.vca);
 
-//        this.compressor.connect(this.revGain);
-        //this.delay.delayTime.value = 0.25;
-        //this.delayFeedback= this.ctx.createGain();
-        //this.delayFeedback.connect(this.delay);
-        //this.delayFeedback.gain.value = 0.3;
-        //this.delay.connect(this.delayFeedback);
-
-//        this.delay.connect(this.compressor)
-
-        //this.vca.connect(this.moogeffect());
-        //this.moogeffect().connect(this.ctx.destination)
-        //this.compressor.connect(this.moogeffect());
-        //this.moogeffect().connect(this.ctx.destination)
-        //this.moogeffect().connect(this.vca)
-       this.tmpBuffer.connect(this.vca);
-
-       this.vca.connect(this.compressor);
 
        this.biquadFilter = this.ctx.createBiquadFilter();
 
        this.biquadFilter.type = "highpass";
        this.biquadFilter.frequency.value = 2000;
-       this.biquadFilter.gain.value = 20;
-       this.compressor.connect(this.biquadFilter);
-       this.biquadFilter.connect(this.ctx.destination);
+       this.biquadFilter.gain.value = 0.8;
+
+       this.vca.connect(this.biquadFilter);
+       this.feedbackGain = this.ctx.createGain();
+       this.biquadFilter.connect(this.feedbackGain);
+       this.feedbackGain.connect(this.convolver)
+       this.feedbackGain.gain.value = 0.8;
+
+       this.convolver.connect(this.compressor);
+       this.compressor.connect(this.ctx.destination);
 
         try {
             this.query = JSON.parse(unescape(window.location.search.substring(1)))
@@ -230,7 +230,7 @@ var jQuencer={
 		        var o = jQuencer.ctx.createOscillator();
 		        o.type = osc.type;
 		        o.frequency.value = osc.freq;
-		        o.connect(jQuencer.tmpBuffer);
+		        o.connect(jQuencer.startBuffer);
 		        o.start(0);
 		        o.stop(n + (decay + 0.01));
 		        o.onended = function () {

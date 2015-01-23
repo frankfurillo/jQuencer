@@ -39,27 +39,27 @@ dabombSub{
 
 }
 #stopPauseToggle {
-    background-image:url('sprite.png');
+    background-image:url('../img/sprite.png');
     background-position:-16px -430px;
     width:40px;
     height:40px;
 }
 
 .triangle{
-    background-image:url('sprite.png');
+    background-image:url('../img/sprite.png');
     background-position:5px -298px;
     width:30px;
     height:30px;
 }
 .sine{
-    background-image:url('sprite.png');
+    background-image:url('../img/sprite.png');
     background-position:5px -332px;
     width:30px;
     height:20px;
 
 }
 .saw{
-    background-image:url('sprite.png');
+    background-image:url('../img/sprite.png');
     background-position:5px -359px;
     width:30px;
     height:30px;
@@ -68,7 +68,7 @@ dabombSub{
 
 
 #stopPauseToggle.pause {
-    background-image:url('sprite.png');
+    background-image:url('../img/sprite.png');
     background-position:-16px -472px;
     width:40px;
     height:40px;
