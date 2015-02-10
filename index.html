@@ -270,7 +270,9 @@
             })
             trapatap.trapTilt(function () {
                 //connect filter to acceleromter y
-                jQuencer.biquadFilter.frequency.value = 2000 + (trapatap.accelerometer[1] * 100);
+                
+                //jQuencer.biquadFilter.frequency.value = 2000 + (trapatap.accelerometer[1] * 100);
+                jQuencer.sequencer.globalDecay = 0.2 + (trapatap.accelerometer[0]*0.03);
             })
 
             trapatap.trapMove($(".oscGrid"), function () {

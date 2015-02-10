@@ -13,7 +13,7 @@
     bufferSize: 2048,
     loadSounds: function(){
         var irHallRequest = new XMLHttpRequest();
-        irHallRequest.open("GET", "audio/spring.wav", true);
+        irHallRequest.open("GET", "audio/Rays.wav", true);
         irHallRequest.responseType = "arraybuffer";
         irHallRequest.onload = function () {
             
@@ -50,29 +50,23 @@
 
         //this.tmpBuffer = this.moogeffect();
         this.startBuffer = this.ctx.createGain();
-
         this.convolver = this.convolverEffect();
+        
+
+
         this.vca = this.ctx.createGain();
 
         this.compressor = this.ctx.createDynamicsCompressor();
       
-        this.startBuffer.connect(this.vca);
-
+//        this.startBuffer.connect(this.vca);
 
        this.biquadFilter = this.ctx.createBiquadFilter();
-
        this.biquadFilter.type = "highpass";
        this.biquadFilter.frequency.value = 2000;
        this.biquadFilter.gain.value = 0.8;
 
-       this.vca.connect(this.biquadFilter);
-       this.feedbackGain = this.ctx.createGain();
-       this.biquadFilter.connect(this.feedbackGain);
-       this.feedbackGain.connect(this.convolver)
-       this.feedbackGain.gain.value = 0.8;
 
-       this.convolver.connect(this.compressor);
-       this.compressor.connect(this.ctx.destination);
+        this.chainFxs([this.vca,  this.compressor, this.ctx.destination]);
 
         try {
             this.query = JSON.parse(unescape(window.location.search.substring(1)))
@@ -97,7 +91,17 @@
         loadedFunction(this.ctx);
     },
 
+    chainFxs:function(arrFxs){
+        var prev = null;
+       
+        arrFxs.forEach(function (f) {
+            if (prev != null) {
+                    prev.connect(f);
+            }
+            prev = f;
 
+        });
+    },
 
 
 
@@ -127,7 +131,8 @@
 	    notesInQueue : [],      // the notes that have been put into the web audio,
 	
 
-    
+	    globalDecay: 0.2,
+        globalAttack: 0.01,
     
         stepStarted:$.Event("StepStarted"),
         stepStopped: $.Event("StepStopped"),
@@ -218,21 +223,21 @@
 		        var n = time;
 		        jQuencer.vca.gain.cancelScheduledValues(n);
 		        jQuencer.vca.gain.setValueAtTime(0, n);
-		        var topVol = 0.3 / oList.length; //
+		        var topVol = 0.1 / oList.length; //
 		        if (jQuencer.pause) {
 		            topVol = 0;
 		        }
-		        jQuencer.vca.gain.linearRampToValueAtTime(topVol, n + 0.01);
-		        var decay = 0.2;
-		        jQuencer.vca.gain.linearRampToValueAtTime(0.0, n + decay);
+		        jQuencer.vca.gain.linearRampToValueAtTime(topVol, n + jQuencer.sequencer.globalAttack);
+//		        var decay = 0.2;
+		        jQuencer.vca.gain.linearRampToValueAtTime(0.0, n + jQuencer.sequencer.globalAttack+ jQuencer.sequencer.globalDecay);
 		        //jQuencer.vca.connect(jQuencer.ctx.destination);
 
 		        var o = jQuencer.ctx.createOscillator();
 		        o.type = osc.type;
 		        o.frequency.value = osc.freq;
-		        o.connect(jQuencer.startBuffer);
+		        o.connect(jQuencer.vca);
 		        o.start(0);
-		        o.stop(n + (decay + 0.01));
+		        o.stop(n + jQuencer.sequencer.globalAttack+  jQuencer.sequencer.globalDecay + 0.0001);
 		        o.onended = function () {
 		           o.disconnect();
 		           // $("body").trigger(jQuencer.sequencer.stepStopped);
@@ -248,106 +253,7 @@
 		},
 
         timerCount:0,
-		playAllSteps: function () {
-			if (this.steps.length == 0) { return; }
-			this.currentIndex=0;
-			for (var i = 0; i < this.steps.length; i++) {
-			    var n = jQuencer.ctx.currentTime;
-			    this.timerCount++;
-				var stepCurr = n+(this.timerCount*(jQuencer.tempoCalculator.defaultTempo/1000));
-				var oList = this.steps[i].oscillators;
-				var oCount=0;
-				oList.forEach(function (osc) {
-
-					jQuencer.vca.gain.cancelScheduledValues(stepCurr);
-					jQuencer.vca.gain.setValueAtTime(0, stepCurr);
-					var topVol = 0.9 / oList.length; //
-					if (jQuencer.pause) {
-						topVol = 0;
-					}
-					jQuencer.vca.gain.linearRampToValueAtTime(topVol, stepCurr + 0.1);
-					var decay = 0.3;
-					jQuencer.vca.gain.linearRampToValueAtTime(0.0, stepCurr + decay);
-					// jQuencer.vca.connect(jQuencer.ctx.destination);
-
-					var o = jQuencer.ctx.createOscillator();
-					o.type = osc.type;
-					o.frequency.value = osc.freq;
-					o.connect(jQuencer.vca);
-					o.start(stepCurr);
-					o.stop(stepCurr + (decay + 0.2));
-					if(oCount==0){
-						o.onended = function () {
-						o.disconnect();
-						$("body").trigger(jQuencer.sequencer.stepStarted);
-						 jQuencer.sequencer.currentIndex++;
-						 if (jQuencer.sequencer.currentIndex > jQuencer.sequencer.steps.length - 1) {
-			                  jQuencer.sequencer.currentIndex = 0;
-			             }
-
-
-
-			             };
-					}
-					else{
-					o.onended = function () {
-						o.disconnect();
-						$("body").trigger(jQuencer.sequencer.stepStopped);
-
-					};
-						
-					}
-					osc.oscillator = o;
-					oCount++;
-
-				});
-			}
-
-				if (this.timerCount < 100) { //dont batch forever
-					//start over if no stop action is taken
-					//if (!this.stop) {
-						this.playAllSteps();
-					//}
-				}
-
-		},
-        playStep: function () {
-            if (this.steps.length == 0) { return;}
-            var oList = this.steps[this.currentIndex].oscillators;
-           // var oListLength = oList.length;
-            oList.forEach(function (osc) {
-
-                var n = jQuencer.ctx.currentTime;
-                jQuencer.vca.gain.cancelScheduledValues(n);
-                jQuencer.vca.gain.setValueAtTime(0, n);
-                var topVol = 0.9/oList.length; //
-                if(jQuencer.pause){
-	                topVol=0;
-                }
-                jQuencer.vca.gain.linearRampToValueAtTime(topVol, n + 0.1);
-                var decay=0.3;
-                jQuencer.vca.gain.linearRampToValueAtTime(0.0, n +decay);
-               // jQuencer.vca.connect(jQuencer.ctx.destination);
-
-                var o = jQuencer.ctx.createOscillator();
-                o.type = osc.type;
-                o.frequency.value = osc.freq;
-                o.connect(jQuencer.vca);
-                o.start(0);
-                o.stop(n+(decay+0.2));
-                o.onended = function () {
-                    o.disconnect();
-                    $("body").trigger(jQuencer.sequencer.stepStopped);
-
-                };
-                osc.oscillator = o;
-
-            });
-            $("body").trigger(jQuencer.sequencer.stepStarted);
-
-        }
-        ,
-        
+	    
         run: function () {
         
             this.isPlaying = !this.isPlaying;
@@ -362,16 +268,8 @@
 		        return "play";
 		    }
 
-            //this.playAllSteps(); //UNDER CONSTRUCTION
-			//return;
-		
-		
-			//this.playStep(); //working but bad shit
-            //this.currentIndex++;
-
 
             clearTimeout(this.st);
-            //gCind = currentIndex;
             this.st = setTimeout(function () {
                 if (jQuencer.sequencer.currentIndex > jQuencer.sequencer.steps.length - 1) {
                     jQuencer.sequencer.currentIndex = 0;
