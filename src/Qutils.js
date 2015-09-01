@@ -1,6 +1,5 @@
-﻿(function (window, $) {
-    "use strict"
-
+﻿(function (window) {
+    "use strict";
     var Qutils = {
   
         fx: {
@@ -28,6 +27,6 @@
 
             return 440 * Math.pow(2, (key_number - 49) / 12);
         }
-    }
+    };
     window.Qutils = Qutils;
-})(window, jQuery)
+})(window)

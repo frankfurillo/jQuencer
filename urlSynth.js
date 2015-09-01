@@ -4,11 +4,11 @@
     var slaskO, vca, seq;
     var st = "";
     //var currentIndex = 0;
-    //EXE http://localhost/AngularSpa3/urlSynth/index.html?{%22command%22:%22sequence%22,%22notes%22:[12,24]}
+    //USAGE http://localhost:50348/urlSynth.html?{"command":"sequence","notes":[722,400,452,640],"tempo":900}
     function init(loadedFunction) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         ctx = new AudioContext();
-        query = JSON.parse(unescape(window.location.search.substring(1)))
+        query = JSON.parse(unescape(window.location.search.substring(1)));
         vca = ctx.createGain();
 
         if (query.command == "sequence") {
